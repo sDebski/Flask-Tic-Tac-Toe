@@ -28,8 +28,8 @@ class Game(db.Model):
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = True)
     result = db.Column(db.Integer, default = 0)
     
-    session1 = relationship('Session', foreign_keys='session1_id')
-    user1 = relationship('User', foreign_keys='user1_id')
-    session1 = relationship('Session', foreign_keys='session2_id')
-    user2 = relationship('User', foreign_keys='user2_id')
+    session1 = relationship('Session', foreign_keys=[session1_id])
+    user1 = relationship('User', foreign_keys=[user1_id])
+    session1 = relationship('Session', foreign_keys=[session2_id])
+    user2 = relationship('User', foreign_keys=[user2_id])
     
