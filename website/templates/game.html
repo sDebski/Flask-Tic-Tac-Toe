@@ -1,5 +1,54 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>GAME</h1>
+
+<style type="text/css">
+    .hidden {display:none}
+</style>
+
+<h2 align='center'>GAME</h2>
+
+<form  id='form' method='POST'>
+    <div align='center'>
+        <h3>Join a queue to look for an opponent!</h3>
+        <button type='submit' class='btn btn-primary'>Join Queue</button>
+    </div>
+</form>
+
+<div id='queue' align='center' class='hidden'>
+    <h1>Waiting for an opponent...</h1>
+</div>
+
+<script>
+    const first_name = '{{user.first_name}}';
+    const socket = io({autoConnect: false});
+
+    form = document.getElementById('form');
+    form.addEventListener('submit', function(e){
+        e.preventDefault()
+        console.log('Form Submitted...')
+
+        socket.connect();
+        socket.on("connect", function() {
+            socket.emit("user_join", first_name);
+        })
+        document.getElementById('form').classList.add("hidden");
+	    document.getElementById('queue').classList.remove("hidden");
+        startAGame();
+    });
+
+    
+    startAGame = () => {
+        console.log('wchodze')
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+            }),
+        };
+        fetch('/game', requestOptions)
+        .then((response) => console.log(response))
+    };
+</script>
+
 {% endblock %}

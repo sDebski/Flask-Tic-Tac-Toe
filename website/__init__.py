@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from sqlalchemy_utils.functions import database_exists
 from flask_login import LoginManager
+from .events import socketio
 
 db = SQLAlchemy()
 db_name = 'database.db'
@@ -19,7 +20,9 @@ def create_app():
     
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
-#     from .models import User
+    
+    socketio.init_app(app)
+
     from .models import User, Session, Game
 
     with app.app_context():

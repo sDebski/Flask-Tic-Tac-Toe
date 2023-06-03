@@ -28,8 +28,17 @@ def home():
 @login_required
 def game():
     session = Session.query.filter_by(user_id=current_user.id, finished=False).first()
-    if session:
-        flash('You already have a session.', category='error')
+    if not session:
+        flash('You do not have active session.', category='error')
         print(session.user_id)
         print(session.user_id, session.date, session.points, session.finished)
+    else:
+        if request.method=='POST':
+            print('DOTARLEM')
+            flash('Game started, waiting for an opponent!', category='success')
+            new_game = Game(session1_id=session.id, user1_id=current_user.id)
+            db.session.add(new_game)
+            db.session.commit()
+            print(new_game)
+            
     return render_template('game.html', user=current_user)
