@@ -93,6 +93,11 @@ def handle_user_move(field_id, sign, user_id, room_id):
         else:
             emit('player_turn', {'my_turn': room.player1_id, 'opponent': room.player2_id}, to=room_id)
     
+@socketio.on('leave')
+def handle_leaving_room(room_id):
+    room = [room for room in Rooms if room.id == room_id][0]
+    leave_room(room)
+    send('Room left.', to=room.id)
 
 def checkIfGameFinished(room, user_id):
     print(room.game_state)
@@ -131,4 +136,3 @@ def checkIfGameFinished(room, user_id):
     
     return False
     
-        

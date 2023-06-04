@@ -59,7 +59,7 @@
       }
 </style>
 
-<h2 align='center'>GAME</h2>
+<h2 align='center'>GAME, Your Credits: {{credits}}</h2>
 
 <div id='joining_game' align='center'>
     <h3>Join a queue to look for an opponent!</h3>
@@ -90,9 +90,12 @@
         </tr>
     </table>
     <hr/>
-    <div class='description'>
+    <div id='description' class='description'>
         <span id='player1_firstname' class='left'>Player 1</span>
         <span id='player2_firstname' class='right'>Player 2</span>
+    </div>
+    <div align='center'>
+        <button id='back' type='submit' class='btn btn-secondary'>Back</button>
     </div>
 </div>
 
@@ -116,6 +119,13 @@
         //startAGame();
     });
 
+    document.getElementById('back').addEventListener('click', () => {
+        document.getElementById('joining_game').classList.remove("hidden");
+	    document.getElementById('board').classList.add("hidden");
+        document.getElementById('description').classList.add("hidden");
+        document.getElementById('player1_firstname').innerText=''
+        document.getElementById('player2_firstname').innerText=''
+    })
     /*
     startAGame = () => {
         console.log('wchodze')
@@ -139,6 +149,7 @@
     gameStart = (p1, p2) => {
         document.getElementById('queue').classList.add("hidden");
         document.getElementById('board').classList.remove("hidden");
+        document.getElementById('back').classList.add("hidden");
         document.getElementById('player1_firstname').innerText=p1
         document.getElementById('player2_firstname').innerText=p2
         console.log('Game started!');
@@ -191,12 +202,6 @@
         winner_id = data['winner_id'];
         if (user_id == winner_id) {
             document.getElementById('game_state').innerText='You Won!!!'
-            var recordData = {
-                ...data,
-                'result': user_id,
-                'status': 'won'
-            };
-            recordGame(recordData);
         } else {
             document.getElementById('game_state').innerText='You Lost!'
         }
@@ -206,6 +211,12 @@
             field.classList.add("grey");
             field.removeEventListener('click', addSocketMoveToField );
         };
+
+        var recordData = {
+            ...data,
+            'status': 'won'
+        };
+        recordGame(recordData);
     });
 
     socket.on('draw', (data) => {
@@ -217,8 +228,9 @@
             }
             recordGame(recordData)
         }
-        document.getElementById('game_state').innerText='Draw'       
-
+        document.getElementById('game_state').innerText='Draw'
+        document.getElementById('back').classList.remove('hidden')      
+        socket.emit('leave', to=room_id)
     })
 
     socket.on('move_made',(data) => {
