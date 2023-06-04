@@ -98,6 +98,7 @@ def handle_leaving_room(room_id):
     room = [room for room in Rooms if room.id == room_id][0]
     leave_room(room)
     send('Room left.', to=room.id)
+    print('Room left.')
 
 def checkIfGameFinished(room, user_id):
     print(room.game_state)

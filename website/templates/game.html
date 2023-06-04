@@ -9,7 +9,6 @@
         text-align: center;
       }
       p {
-        font: 
         width: 100px;
         height: 100px;
         background-color: #f4511e;
@@ -56,6 +55,11 @@
       }
       .right {
         float:right;
+      }
+      
+      span {
+        font-size: 25px;
+        font-weight: bolder;
       }
 </style>
 
@@ -105,14 +109,23 @@
     const user_id = '{{user.id}}'
     const socket = io({autoConnect: false});
     var mySign = '';
-    var room_id = ''
+    var room_id = '';
+    var rejoin = false
 
+    socket.on("connect", function() {
+        socket.emit("user_join", user_id, first_name, session_id);
+    })
   
     document.getElementById('btn-join').addEventListener('click', function(e){
         socket.connect();
-        socket.on("connect", function() {
+        console.log(rejoin, '  rejoin')
+        if (rejoin) {
+            for (let i = 0; i<9; i++) {
+                let field = document.getElementById(i.toString());
+                field.innerText=''
+            };
             socket.emit("user_join", user_id, first_name, session_id);
-        })
+        }
         
         document.getElementById('joining_game').classList.add("hidden");
 	    document.getElementById('queue').classList.remove("hidden");
@@ -126,19 +139,6 @@
         document.getElementById('player1_firstname').innerText=''
         document.getElementById('player2_firstname').innerText=''
     })
-    /*
-    startAGame = () => {
-        console.log('wchodze')
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-            }),
-        };
-        fetch('/game', requestOptions)
-        .then((response) => console.log(response))
-    };
-    */
 
     socket.on('players_set', (data) => {
         room_id = data['room_id'];
@@ -217,6 +217,8 @@
             'status': 'won'
         };
         recordGame(recordData);
+
+        gameFinished();
     });
 
     socket.on('draw', (data) => {
@@ -229,9 +231,14 @@
             recordGame(recordData)
         }
         document.getElementById('game_state').innerText='Draw'
-        document.getElementById('back').classList.remove('hidden')      
-        socket.emit('leave', to=room_id)
+        gameFinished();
     })
+
+    gameFinished = () => {
+        document.getElementById('back').classList.remove('hidden');   
+        socket.emit('leave', to=room_id);
+        rejoin = true;
+    };
 
     socket.on('move_made',(data) => {
         document.getElementById(data['field_id'].toString()).innerText=data['sign'].toString()

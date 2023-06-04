@@ -11,7 +11,10 @@
 </form>
 
 {% else %}
-<h1>Session active. Start playing! <a href="{{ url_for('views.game') }}">&#10140;</a></h1>
+<div align='center'>
+    <h1>Session active. Start playing! <a href="{{ url_for('views.game') }}">&#10140;</a></h1>
+</div>
+
 {% endif %}
 
 

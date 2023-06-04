@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import  login_required, current_user
 from .models import *
+import datetime
 
 
 views = Blueprint('views', __name__)
@@ -36,8 +37,6 @@ def game():
         balance = session.points
         if request.method=='POST':
             data = request.json
-            print('DOTARLEM')
-            print(data)
             status = data['status']
             user1 = data['p1']
             user2 = data['p2']
@@ -45,25 +44,19 @@ def game():
             session2 = data['s2']
             
             if data['status'] == 'draw':
-                print('dotarlem do draw')
                 game = Game(session1_id=session1, user1_id=user1, session2_id=session2, user2_id=user2)
                 db.session.add(game)
                 db.session.commit()
                 flash('Draw game added to database!', category='success')
             if data['status'] == 'won':
-                print('dotarlem do wina')
                 winner = data['winner_id']
-                print(current_user.id, winner, ' check winner')
-                print(winner == current_user.id)
                 #check credits balance
                 if winner == str(current_user.id):
-                    print('zwiekszam bilans graczowi ', current_user.first_name)
                     new_balance = balance + 4
                     game = Game(session1_id=session1, user1_id=user1, session2_id=session2, user2_id=user2, result=winner)
                     db.session.add(game)
                     db.session.commit()
                 else:
-                    print('zmniejszam bilans graczowi ', current_user.first_name)
                     new_balance = balance - 3
                 session.points = new_balance
                 balance = new_balance
@@ -73,8 +66,19 @@ def game():
                     
                 db.session.add(session)
                 db.session.commit()
-                print(new_balance)
-
-                return redirect(url_for('.home'))
-            print('dotarlem do konca.')
     return render_template('game.html', user=current_user, session_id=session.id, credits=balance)
+
+
+@views.route('/statistics', methods=['GET'])
+@login_required
+def statistics():
+    games = list(Game.query.filter_by(user1_id = current_user.id))
+    games2 = list(Game.query.filter_by(user2_id = current_user.id))
+   
+    result = games + games2
+    today = datetime.datetime.now().date()
+    print(result[0].date.date())
+    print(today)
+    result = [game for game in result if game.date.date() == today]
+    
+    return render_template('statistics.html', games=result, user=current_user)

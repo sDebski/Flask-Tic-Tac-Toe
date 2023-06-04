@@ -32,4 +32,6 @@ class Game(db.Model):
     user1 = relationship('User', foreign_keys=[user1_id])
     session1 = relationship('Session', foreign_keys=[session2_id])
     user2 = relationship('User', foreign_keys=[user2_id])
+    date = db.Column(db.DateTime(timezone=True), default=func.now(), nullable=True)
+
     
