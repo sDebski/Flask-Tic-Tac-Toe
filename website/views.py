@@ -34,22 +34,27 @@ def game():
         print(session.user_id, session.date, session.points, session.finished)
     else:
         if request.method=='POST':
+            data = request.json
             print('DOTARLEM')
-            #look for an open game
-            game = Game.query.filter_by(user2_id=None, session2_id=None).first()
-            if game:
-                flash('Joining the game!', category='success')
-                game.session2_id=session.id
-                game.user2_id=current_user.id
+            print(data)
+            status = data['status']
+            user1 = data['p1']
+            user2 = data['p2']
+            session1 = data['s1']
+            session2 = data['s2']
+            
+            if data['status'] == 'draw':
+                print('dotarlem do draw')
+                game = Game(session1_id=session1, user1_id=user1, session2_id=session2, user2_id=user2)
                 db.session.add(game)
                 db.session.commit()
-                return {'new': 'false', 'game_id': game.id}
+                flash('Draw game added to database!', category='success')
             else:
-                flash('Waiting for an opponent!', category='success')
-                new_game = Game(session1_id=session.id, user1_id=current_user.id)
-                db.session.add(new_game)
+                print('dotarlem do wina')
+                winner = data['winner_id']
+                game = Game(session1_id=session1, user1_id=user1, session2_id=session2, user2_id=user2, result=winner)
+                db.session.add(game)
                 db.session.commit()
-                print(new_game)
-                return {'new': 'true', 'game_id': game.id}
-            
-    return render_template('game.html', user=current_user)
+                flash('Won/Lost game added to database!', category='success')
+            print('dotarlem do konca.')
+    return render_template('game.html', user=current_user, session_id=session.id)

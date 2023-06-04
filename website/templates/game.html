@@ -8,7 +8,7 @@
     h1 {
         text-align: center;
       }
-      td {
+      p {
         font: 
         width: 100px;
         height: 100px;
@@ -23,12 +23,15 @@
         transition: 0.3s;
       }
 
+      p:hover {
+        opacity: 1;
+      }
+
       .grey {
+        opacity: 1;
         background-color: #696969;
       }
-      td:hover {
-        opacity: 1
-      }
+      
       table {
         margin: 5px auto;
       }
@@ -71,19 +74,19 @@
     <h1 id='game_state'>Game state</h1>
     <table>
         <tr>
-            <td><p id='0'>X</p></td>
-            <td class="vert"><p id='1'>X</p></td>
-            <td><p id='2'>X</p></td>
+            <td><p id='0'></p></td>
+            <td class="vert"><p id='1'></p></td>
+            <td><p id='2'></p></td>
         </tr>
         <tr>
-            <td class="hori"><p id='3'>X</p></td>
-            <td class="vert hori"><p id='4'>X</p></td>
-            <td class="hori"><p id='5'>X</p></td>
+            <td class="hori"><p id='3'></p></td>
+            <td class="vert hori"><p id='4'></p></td>
+            <td class="hori"><p id='5'></p></td>
         </tr>
         <tr>
-            <td><p id='6'>X</p></td>
-            <td class="vert"><p id='7'>X</p></td>
-            <td><p id='8'>X</p></td>
+            <td><p id='6'></p></td>
+            <td class="vert"><p id='7'></p></td>
+            <td><p id='8'></p></td>
         </tr>
     </table>
     <hr/>
@@ -94,16 +97,18 @@
 </div>
 
 <script>
+    const session_id = '{{session_id}}'
     const first_name = '{{user.first_name}}';
     const user_id = '{{user.id}}'
     const socket = io({autoConnect: false});
     var mySign = '';
+    var room_id = ''
 
   
     document.getElementById('btn-join').addEventListener('click', function(e){
         socket.connect();
         socket.on("connect", function() {
-            socket.emit("user_join", user_id, first_name);
+            socket.emit("user_join", user_id, first_name, session_id);
         })
         
         document.getElementById('joining_game').classList.add("hidden");
@@ -126,7 +131,9 @@
     */
 
     socket.on('players_set', (data) => {
+        room_id = data['room_id'];
         gameStart(data['player1_first_name'], data['player2_first_name']);
+        
     });
 
     gameStart = (p1, p2) => {
@@ -142,39 +149,94 @@
 
     socket.on('player_turn', (data) => {
         console.log('Dostalem Player turn')
-        p1 = data['player1_id']
-        p2 = data['player2_id']
-        console.log(data['player1_id'], user_id)
-        if (data['player1_id'] == user_id) {
+        p1 = data['my_turn']
+        p2 = data['opponent']
+        console.log(data['my_turn'], user_id)
+        if (data['my_turn'] == user_id) {
             document.getElementById('game_state').innerText='My turn.'
-            changePlayerTurn(p1, p2);
         } else {
             document.getElementById('game_state').innerText='Opponent`s turn.'
-            changePlayerTurn(p2, p1);
         }
+        changePlayerTurn(p1, p2);
         
     });
 
     changePlayerTurn = (p1, p2) => {
-        console.log('Change player turn');
-        for (let i = 0; i++; i<9) {
-            field = document.getElementById(i.toString())
-            console.log('Field:', field)
+        for (let i = 0; i<9; i++) {
+            let field = document.getElementById(i.toString())
+            field.classList.add("grey");
+            field.removeEventListener('click', addSocketMoveToField )
+
             if (user_id == p1) {
-                field.classList.remove("grey");
+                console.log(user_id, p1)
                 if (field.innerText == '') {
-                    field.addEventListener('click', () => {
-                        socket.on('move', field_id=i.toString(), sign=mySign, p1);
-                    });
+                    field.classList.remove("grey");
+                    console.log('Dodaje funkcjonalnosc do ', field);
+                    field.myParam = i.toString()
+                    field.addEventListener('click', addSocketMoveToField);
+                    
                    
                 }
-            } else {
-                field.classList.add("grey");
-                field.removeEventListener('click', () => {} )
-            }   
-        }
-    }
+            };
+        };
+    };
 
+    addSocketMoveToField = (e) => {
+        var i = e.currentTarget.myParam;
+        console.log('I: ', i)
+        socket.emit('move', field_id=i, sign=mySign, user_id, room_id);
+    };
+
+    socket.on('game_finished', data => {
+        winner_id = data['winner_id'];
+        if (user_id == winner_id) {
+            document.getElementById('game_state').innerText='You Won!!!'
+            var recordData = {
+                ...data,
+                'result': user_id,
+                'status': 'won'
+            };
+            recordGame(recordData);
+        } else {
+            document.getElementById('game_state').innerText='You Lost!'
+        }
+
+        for (let i = 0; i<9; i++) {
+            let field = document.getElementById(i.toString());
+            field.classList.add("grey");
+            field.removeEventListener('click', addSocketMoveToField );
+        };
+    });
+
+    socket.on('draw', (data) => {
+        //one db commit
+        if (user_id == data['p1']) {
+            var recordData = {
+                ...data,
+                'status': 'draw'
+            }
+            recordGame(recordData)
+        }
+        document.getElementById('game_state').innerText='Draw'       
+
+    })
+
+    socket.on('move_made',(data) => {
+        document.getElementById(data['field_id'].toString()).innerText=data['sign'].toString()
+    })
+
+    recordGame = (recordData) => {
+        console.log('Recording a game...')
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...recordData
+            }),
+        };
+        fetch('/game', requestOptions)
+        .then((response) => console.log(response))
+    };
 </script>
 
 {% endblock %}
