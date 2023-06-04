@@ -35,10 +35,21 @@ def game():
     else:
         if request.method=='POST':
             print('DOTARLEM')
-            flash('Game started, waiting for an opponent!', category='success')
-            new_game = Game(session1_id=session.id, user1_id=current_user.id)
-            db.session.add(new_game)
-            db.session.commit()
-            print(new_game)
+            #look for an open game
+            game = Game.query.filter_by(user2_id=None, session2_id=None).first()
+            if game:
+                flash('Joining the game!', category='success')
+                game.session2_id=session.id
+                game.user2_id=current_user.id
+                db.session.add(game)
+                db.session.commit()
+                return {'new': 'false', 'game_id': game.id}
+            else:
+                flash('Waiting for an opponent!', category='success')
+                new_game = Game(session1_id=session.id, user1_id=current_user.id)
+                db.session.add(new_game)
+                db.session.commit()
+                print(new_game)
+                return {'new': 'true', 'game_id': game.id}
             
     return render_template('game.html', user=current_user)
