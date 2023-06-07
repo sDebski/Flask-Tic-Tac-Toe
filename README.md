@@ -1,5 +1,9 @@
 # Flask-Tic-Tac-Toe
 
+## DOCKER IMAGE
+Here is the docker image: [Docker Image](https://hub.docker.com/r/skwdebski/flask-tic-tac-toe).
+
+
 Aplikacja zawiera obsługę logowania i rejestrowania użytkowników.
 
 Gracz rozpoczyna sesję, jeśli takowej nie posiada, mając na koncie 10 kredytów.
