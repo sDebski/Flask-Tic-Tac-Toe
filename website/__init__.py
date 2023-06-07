@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
-from sqlalchemy_utils.functions import database_exists
 from flask_login import LoginManager
 from .events import socketio
 
