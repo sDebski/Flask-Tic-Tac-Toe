@@ -1,261 +1,257 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <style type="text/css">
-    .hidden {display:none}
+  .hidden {
+    display: none;
+  }
 
-    h1 {
-        text-align: center;
-      }
-      p {
-        width: 100px;
-        height: 100px;
-        background-color: #f4511e;
-        border: none;
-        color: white;
-        padding: 16px 32px;
-        text-align: center;
-        font-size: 16px;
-        margin: 4px 2px;
-        opacity: 0.6;
-        transition: 0.3s;
-      }
+  h1 {
+    text-align: center;
+  }
+  p {
+    width: 100px;
+    height: 100px;
+    background-color: #f4511e;
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-align: center;
+    font-size: 16px;
+    margin: 4px 2px;
+    opacity: 0.6;
+    transition: 0.3s;
+  }
 
-      p:hover {
-        opacity: 1;
-      }
+  p:hover {
+    opacity: 1;
+  }
 
-      .grey {
-        opacity: 1;
-        background-color: #696969;
-      }
-      
-      table {
-        margin: 5px auto;
-      }
-      .vert {
-        border-left: 2px solid black;
-        border-right: 2px solid black;
-      }
-      .hori {
-        border-top: 2px solid black;
-        border-bottom: 2px solid black;
-      }
+  .grey {
+    opacity: 1;
+    background-color: #696969;
+  }
 
-      .description {
-        width: 200px;
-        height: 50px:
-        background-color: blue;
-        margin-bottom: 20px;
-      }
+  table {
+    margin: 5px auto;
+  }
+  .vert {
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+  }
+  .hori {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+  }
 
-      .left {
-        float:left;
-      }
-      .right {
-        float:right;
-      }
-      
-      span {
-        font-size: 25px;
-        font-weight: bolder;
-      }
+  .description {
+    width: 200px;
+    height: 50px;
+    background-color: lightblue;
+    margin-bottom: 20px;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .left {
+    float: left;
+  }
+  .right {
+    float: right;
+  }
+
+  span {
+    font-size: 25px;
+    font-weight: bolder;
+  }
 </style>
 
-<h2 align='center'>GAME, Your Credits: {{credits}}</h2>
+<h2 align="center">Your Credits: {{credits}}</h2>
 
-<div id='joining_game' align='center'>
-    <h3>Join a queue to look for an opponent!</h3>
-    <button id='btn-join' type='submit' class='btn btn-primary'>Join Queue</button>
+<div id="joining_game" align="center">
+  <h3>Join a queue to look for an opponent!</h3>
+  <button id="btn-join" type="submit" class="btn btn-primary">
+    Join Queue
+  </button>
 </div>
 
-<div id='queue' align='center' class='hidden'>
-    <h1>Waiting for an opponent...</h1>
+<div id="queue" align="center" class="hidden">
+  <h1>Waiting for an opponent...</h1>
 </div>
 
-<div id='board' align='center' class='hidden'>
-    <h1 id='game_state'>Game state</h1>
-    <table>
-        <tr>
-            <td><p id='0'></p></td>
-            <td class="vert"><p id='1'></p></td>
-            <td><p id='2'></p></td>
-        </tr>
-        <tr>
-            <td class="hori"><p id='3'></p></td>
-            <td class="vert hori"><p id='4'></p></td>
-            <td class="hori"><p id='5'></p></td>
-        </tr>
-        <tr>
-            <td><p id='6'></p></td>
-            <td class="vert"><p id='7'></p></td>
-            <td><p id='8'></p></td>
-        </tr>
-    </table>
-    <hr/>
-    <div id='description' class='description'>
-        <span id='player1_firstname' class='left'>Player 1</span>
-        <span id='player2_firstname' class='right'>Player 2</span>
-    </div>
-    <div align='center'>
-        <button id='back' type='submit' class='btn btn-secondary'>Back</button>
-    </div>
+<div id="board" align="center" class="hidden">
+  <h1 id="game_state">Game state</h1>
+  <table>
+    <tr>
+      <td><p id="0"></p></td>
+      <td class="vert"><p id="1"></p></td>
+      <td><p id="2"></p></td>
+    </tr>
+    <tr>
+      <td class="hori"><p id="3"></p></td>
+      <td class="vert hori"><p id="4"></p></td>
+      <td class="hori"><p id="5"></p></td>
+    </tr>
+    <tr>
+      <td><p id="6"></p></td>
+      <td class="vert"><p id="7"></p></td>
+      <td><p id="8"></p></td>
+    </tr>
+  </table>
+  <hr />
+  <div id="description" class="description">
+    <span id="player1_firstname" class="left">Player 1</span>
+    <span id="player2_firstname" class="right">Player 2</span>
+  </div>
+  <div align="center">
+    <button id="back" type="submit" class="btn btn-secondary">Back</button>
+  </div>
 </div>
 
 <script>
-    const session_id = '{{session_id}}'
-    const first_name = '{{user.first_name}}';
-    const user_id = '{{user.id}}'
-    const socket = io({autoConnect: false});
-    var mySign = '';
-    var room_id = '';
-    var rejoin = false
+  const session_id = "{{session_id}}";
+  const first_name = "{{user.first_name}}";
+  const user_id = "{{user.id}}";
+  const socket = io({ autoConnect: false });
+  var mySign = "";
+  var room_id = "";
 
-    socket.on("connect", function() {
-        socket.emit("user_join", user_id, first_name, session_id);
-    })
-  
-    document.getElementById('btn-join').addEventListener('click', function(e){
-        socket.connect();
-        console.log(rejoin, '  rejoin')
-        if (rejoin) {
-            for (let i = 0; i<9; i++) {
-                let field = document.getElementById(i.toString());
-                field.innerText=''
-            };
-            socket.emit("user_join", user_id, first_name, session_id);
+  socket.on("connect", function () {
+    socket.emit("user_join", user_id, first_name, session_id);
+  });
+
+  window.onbeforeunload = function () {
+    socket.emit("client_disconnecting", user_id);
+  };
+
+  document.getElementById("btn-join").addEventListener("click", function (e) {
+    socket.connect();
+    for (let i = 0; i < 9; i++) {
+      let field = document.getElementById(i.toString());
+      field.innerText = "";
+    }
+    document.getElementById("joining_game").classList.add("hidden");
+    document.getElementById("queue").classList.remove("hidden");
+  });
+
+  document.getElementById("back").addEventListener("click", () => {
+    location.reload();
+  });
+
+  socket.on("players_set", (data) => {
+    room_id = data["room_id"];
+    gameStart(data["player1_first_name"], data["player2_first_name"]);
+  });
+
+  gameStart = (p1, p2) => {
+    function _capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    document.getElementById("queue").classList.add("hidden");
+    document.getElementById("board").classList.remove("hidden");
+    document.getElementById("back").classList.add("hidden");
+    document.getElementById("player1_firstname").innerText =
+      _capitalizeFirstLetter(p1);
+    document.getElementById("player2_firstname").innerText =
+      _capitalizeFirstLetter(p2);
+    console.log("Game started!");
+    if (p1 == first_name) {
+      mySign = "O";
+    } else mySign = "X";
+  };
+
+  socket.on("player_turn", (data) => {
+    console.log("Dostalem Player turn");
+    p1 = data["my_turn"];
+    p2 = data["opponent"];
+    console.log(data["my_turn"], user_id);
+    if (data["my_turn"] == user_id) {
+      document.getElementById("game_state").innerText = "My turn.";
+    } else {
+      document.getElementById("game_state").innerText = "Opponent`s turn.";
+    }
+    changePlayerTurn(p1, p2);
+  });
+
+  changePlayerTurn = (p1, p2) => {
+    for (let i = 0; i < 9; i++) {
+      let field = document.getElementById(i.toString());
+      field.classList.add("grey");
+      field.removeEventListener("click", addSocketMoveToField);
+
+      if (user_id == p1) {
+        console.log(user_id, p1);
+        if (field.innerText == "") {
+          field.classList.remove("grey");
+          field.myParam = i.toString();
+          field.addEventListener("click", addSocketMoveToField);
         }
-        
-        document.getElementById('joining_game').classList.add("hidden");
-	    document.getElementById('queue').classList.remove("hidden");
-        //startAGame();
-    });
+      }
+    }
+  };
 
-    document.getElementById('back').addEventListener('click', () => {
-        document.getElementById('joining_game').classList.remove("hidden");
-	    document.getElementById('board').classList.add("hidden");
-        document.getElementById('description').classList.add("hidden");
-        document.getElementById('player1_firstname').innerText=''
-        document.getElementById('player2_firstname').innerText=''
-    })
+  addSocketMoveToField = (e) => {
+    var i = e.currentTarget.myParam;
+    console.log("I: ", i);
+    socket.emit("move", (field_id = i), (sign = mySign), user_id, room_id);
+  };
 
-    socket.on('players_set', (data) => {
-        room_id = data['room_id'];
-        gameStart(data['player1_first_name'], data['player2_first_name']);
-        
-    });
+  socket.on("game_finished", (data) => {
+    winner_id = data["winner_id"];
+    if (user_id == winner_id) {
+      document.getElementById("game_state").innerText = "You Won!!!";
+    } else {
+      document.getElementById("game_state").innerText = "You Lost!";
+    }
 
-    gameStart = (p1, p2) => {
-        document.getElementById('queue').classList.add("hidden");
-        document.getElementById('board').classList.remove("hidden");
-        document.getElementById('back').classList.add("hidden");
-        document.getElementById('player1_firstname').innerText=p1
-        document.getElementById('player2_firstname').innerText=p2
-        console.log('Game started!');
-        if (p1 == first_name) {
-            mySign = "O"
-        } else mySign = "X"
+    for (let i = 0; i < 9; i++) {
+      let field = document.getElementById(i.toString());
+      field.classList.add("grey");
+      field.removeEventListener("click", addSocketMoveToField);
+    }
+
+    var recordData = {
+      ...data,
+      status: "won",
     };
+    recordGame(recordData);
 
-    socket.on('player_turn', (data) => {
-        console.log('Dostalem Player turn')
-        p1 = data['my_turn']
-        p2 = data['opponent']
-        console.log(data['my_turn'], user_id)
-        if (data['my_turn'] == user_id) {
-            document.getElementById('game_state').innerText='My turn.'
-        } else {
-            document.getElementById('game_state').innerText='Opponent`s turn.'
-        }
-        changePlayerTurn(p1, p2);
-        
-    });
+    gameFinished();
+  });
 
-    changePlayerTurn = (p1, p2) => {
-        for (let i = 0; i<9; i++) {
-            let field = document.getElementById(i.toString())
-            field.classList.add("grey");
-            field.removeEventListener('click', addSocketMoveToField )
+  socket.on("draw", (data) => {
+    if (user_id == data["p1"]) {
+      var recordData = {
+        ...data,
+        status: "draw",
+      };
+      recordGame(recordData);
+    }
+    document.getElementById("game_state").innerText = "Draw";
+    gameFinished();
+  });
 
-            if (user_id == p1) {
-                console.log(user_id, p1)
-                if (field.innerText == '') {
-                    field.classList.remove("grey");
-                    console.log('Dodaje funkcjonalnosc do ', field);
-                    field.myParam = i.toString()
-                    field.addEventListener('click', addSocketMoveToField);
-                    
-                   
-                }
-            };
-        };
+  gameFinished = () => {
+    document.getElementById("back").classList.remove("hidden");
+  };
+
+  socket.on("move_made", (data) => {
+    document.getElementById(data["field_id"].toString()).innerText =
+      data["sign"].toString();
+  });
+
+  recordGame = (recordData) => {
+    console.log("Recording a game...");
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...recordData,
+      }),
     };
-
-    addSocketMoveToField = (e) => {
-        var i = e.currentTarget.myParam;
-        console.log('I: ', i)
-        socket.emit('move', field_id=i, sign=mySign, user_id, room_id);
-    };
-
-    socket.on('game_finished', data => {
-        winner_id = data['winner_id'];
-        if (user_id == winner_id) {
-            document.getElementById('game_state').innerText='You Won!!!'
-        } else {
-            document.getElementById('game_state').innerText='You Lost!'
-        }
-
-        for (let i = 0; i<9; i++) {
-            let field = document.getElementById(i.toString());
-            field.classList.add("grey");
-            field.removeEventListener('click', addSocketMoveToField );
-        };
-
-        var recordData = {
-            ...data,
-            'status': 'won'
-        };
-        recordGame(recordData);
-
-        gameFinished();
-    });
-
-    socket.on('draw', (data) => {
-        //one db commit
-        if (user_id == data['p1']) {
-            var recordData = {
-                ...data,
-                'status': 'draw'
-            }
-            recordGame(recordData)
-        }
-        document.getElementById('game_state').innerText='Draw'
-        gameFinished();
-    })
-
-    gameFinished = () => {
-        document.getElementById('back').classList.remove('hidden');   
-        socket.emit('leave', to=room_id);
-        rejoin = true;
-    };
-
-    socket.on('move_made',(data) => {
-        document.getElementById(data['field_id'].toString()).innerText=data['sign'].toString()
-    })
-
-    recordGame = (recordData) => {
-        console.log('Recording a game...')
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...recordData
-            }),
-        };
-        fetch('/game', requestOptions)
-        .then((response) => console.log(response))
-    };
+    fetch("/game", requestOptions).then((response) => console.log(response));
+  };
 </script>
 
 {% endblock %}

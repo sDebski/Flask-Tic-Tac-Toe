@@ -1,28 +1,13 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <h1>Your daily statistics</h1>
-{% if games %}
-    {% for game in games %}
-    <p> {{game}} | 
-        {% if game.result == 0 %}
-        draw
-        {% else %}
-            {% if game.result == user.id %}
-            win
-            {% else %}
-            lose
-        {% endif %}
-        | {{game.date}}
-            
-    {% endif %}</p>
+{% if games %} {% for game in games %}
+<p>
+  {{game}} | {% if game.result == 0 %} draw {% else %} {% if game.result ==
+  user.id %} win {% else %} lose {% endif %} | {{game.date}} {% endif %}
+</p>
 
-    {% endfor %}
-{% else %}
+{% endfor %} {% else %}
 <h2>No data to display.</h2>
 
-{% endif %}
-
-
-{% endblock %}
+{% endif %} {% endblock %}
